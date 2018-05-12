@@ -16,6 +16,7 @@ public class SendMessages  extends Thread{
 
     public void run() {
         try{
+            String msg = "";
             while(true){
                 output.writeUTF(in.nextLine());
             }

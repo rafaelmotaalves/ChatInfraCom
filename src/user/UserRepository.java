@@ -1,21 +1,23 @@
 package user;
 
-public class UserRepository {
+import java.io.Serializable;
+
+public class UserRepository implements Serializable {
     private User array[];
     private int size;
     private int current;
 
-    UserRepository(int size) {
+    public UserRepository(int size) {
         this.array =  new User[size];
         this.size = size;
         this.current = 0;
     }
 
-    User [] getArray(){
+    public User [] getArray(){
         return array;
     }
 
-    void doubleSize(){
+    public void doubleSize(){
         this.size = 2 * this.size;
         User aux[] = new User[this.size];
         for(int i = 0; i < this.current ; i++){
@@ -23,8 +25,13 @@ public class UserRepository {
         }
         array = aux;
     }
+    public void print(){
+        for(int i = 0 ; i < this.current; i++){
+            System.out.println("Name: " + array[i].getName() + " Address: " + array[i].getAddress() + " " + "Port: " + array[i].getPort());
+        }
+    }
 
-    void insert(User newUser){
+    public void insert(User newUser){
         array[this.current] = newUser;
         this.current++;
     }

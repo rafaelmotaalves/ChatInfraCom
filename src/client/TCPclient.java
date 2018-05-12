@@ -1,5 +1,9 @@
 package client;
 
+import user.UserRepository;
+
+import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,24 +13,35 @@ public class TCPclient {
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
-        Socket socket;
+        Socket socket, socketG;
+        String serverAddress = "localhost" ;
+        int dport;
+        System.out.println("Write your username: ");
+        String name = in.next();
         String address, func = "";
-        System.out.print("Enter your port: ");
-        int port = in.nextInt();
         try{
-            ServerSocket tmpsocket = new ServerSocket(port);
             while(!func.equals("close")){
+                ServerSocket tmpsocket = new ServerSocket(0);
+                int lport = tmpsocket.getLocalPort();
+                System.out.println(lport);
+                // server setup
+                socketG = new Socket("localhost", 3030);
+                DataOutputStream out = new DataOutputStream(socketG.getOutputStream());
+                out.write(lport);
+                out.writeUTF(name);
+                ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
+                UserRepository usrRep = (UserRepository) input.readObject();
+                usrRep.print();
+                socketG.close();
+                input.close();
+                //p2p setup
                 System.out.print("Enter your action: ");
                 func = in.next();
-
                 if(func.equals("connect")){
-                    System.out.print("Enter destination address: ");
                     address = in.next();
-                    System.out.print("Enter destination port: ");
-                    port = in.nextInt();
+                    dport = in.nextInt();
                     System.out.println("connecting to the user...");
-
-                    socket = new Socket(address, port);
+                    socket = new Socket(address, dport);
                 }else if (func.equals("wait")){
                     System.out.println("waiting connection...");
                     socket = tmpsocket.accept();
@@ -40,12 +55,12 @@ public class TCPclient {
                 Thread snd = new SendMessages(socket);
                 rcv.start();
                 snd.start();
-                rcv.join();
+                snd.join();
+                socket.close();
+                tmpsocket.close();
             }
-            tmpsocket.close();
         }catch (BindException e){
             System.out.println(e.getMessage());
-            System.out.println("other user disconnected");
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
