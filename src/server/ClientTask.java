@@ -24,12 +24,12 @@ public class ClientTask extends Thread {
     public void run() {
         try{
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-            int clientPort = in.read();
+            String clientPort = in.readUTF();
             String clientName = in.readUTF();
-            client = new User(clientName, "localhost", clientPort);
+            client = new User(clientName, "localhost", Integer.parseInt(clientPort));
             this.userRep.insert(client);
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-            userRep.print();
+            System.out.println(client.toString() + " connected");
             out.writeObject(userRep);
         }catch (Exception e){
 

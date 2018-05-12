@@ -27,7 +27,7 @@ public class UserRepository implements Serializable {
     }
     public void print(){
         for(int i = 0 ; i < this.current; i++){
-            System.out.println("Name: " + array[i].getName() + " Address: " + array[i].getAddress() + " " + "Port: " + array[i].getPort());
+            System.out.println( "["+ i +"]" + "Name: " + array[i].getName() + " Address: " + array[i].getAddress() + " " + "Port: " + array[i].getPort());
         }
     }
 
@@ -36,7 +36,11 @@ public class UserRepository implements Serializable {
         this.current++;
     }
 
-    void remove(String address, int port){
+    public User find(int i) {
+        return array[i];
+    }
+
+    public void remove(String address, int port){
         for(int i = 0; i < current; i++){
             if(array[i].getAddress().equals(address) && array[i].getPort() == port){
                 array[i] = array[this.current-1];

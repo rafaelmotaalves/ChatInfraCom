@@ -1,5 +1,6 @@
 package client;
 
+import user.User;
 import user.UserRepository;
 
 import java.io.DataOutputStream;
@@ -15,33 +16,39 @@ public class TCPclient {
         Scanner in = new Scanner(System.in);
         Socket socket, socketG;
         String serverAddress = "localhost" ;
-        int dport;
-        System.out.println("Write your username: ");
+        System.out.print("Write your username: ");
         String name = in.next();
-        String address, func = "";
+        String func = "";
         try{
+            ServerSocket tmpsocket = new ServerSocket(0);
+            int lport = tmpsocket.getLocalPort();
+
+            // server setup
+            socketG = new Socket(serverAddress, 3030);
+            DataOutputStream out = new DataOutputStream(socketG.getOutputStream());
+
+            out.writeUTF(""+  lport);
+            out.writeUTF(name);
+
+            ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
+            UserRepository usrRep = (UserRepository) input.readObject();
+
+            socketG.close();
+            input.close();
             while(!func.equals("close")){
-                ServerSocket tmpsocket = new ServerSocket(0);
-                int lport = tmpsocket.getLocalPort();
-                System.out.println(lport);
-                // server setup
-                socketG = new Socket("localhost", 3030);
-                DataOutputStream out = new DataOutputStream(socketG.getOutputStream());
-                out.write(lport);
-                out.writeUTF(name);
-                ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
-                UserRepository usrRep = (UserRepository) input.readObject();
+
+                System.out.println("Online Hosts: ");
+                usrRep.remove("localhost", lport);
                 usrRep.print();
-                socketG.close();
-                input.close();
+
                 //p2p setup
                 System.out.print("Enter your action: ");
                 func = in.next();
                 if(func.equals("connect")){
-                    address = in.next();
-                    dport = in.nextInt();
+                    int i = in.nextInt();
+                    User connectedUser = usrRep.find(i);
                     System.out.println("connecting to the user...");
-                    socket = new Socket(address, dport);
+                    socket = new Socket(connectedUser.getAddress(), connectedUser.getPort());
                 }else if (func.equals("wait")){
                     System.out.println("waiting connection...");
                     socket = tmpsocket.accept();
@@ -57,8 +64,8 @@ public class TCPclient {
                 snd.start();
                 snd.join();
                 socket.close();
-                tmpsocket.close();
             }
+            tmpsocket.close();
         }catch (BindException e){
             System.out.println(e.getMessage());
         }catch (Exception e){

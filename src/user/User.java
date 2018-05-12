@@ -14,6 +14,10 @@ public class User implements Serializable {
         this.port = port;
     }
 
+    public String toString(){
+        return "Name: " + this.name + " Address: "  + this.address +  " Port: " + this.port;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
