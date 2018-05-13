@@ -29,11 +29,11 @@ public class TCPclient {
 
             out.writeUTF(""+  lport);
             out.writeUTF(name);
-
             ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
             UserRepository usrRep = (UserRepository) input.readObject();
 
-            socketG.close();
+
+            out.close();
             input.close();
             while(!func.equals("close")){
 
@@ -56,7 +56,6 @@ public class TCPclient {
                     System.out.println("closing chat...");
                     break;
                 }
-
                 System.out.println("connection established");
                 Thread rcv = new ReceiveMessages(socket);
                 Thread snd = new SendMessages(socket);
