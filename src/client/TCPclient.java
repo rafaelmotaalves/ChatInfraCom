@@ -2,71 +2,90 @@ package client;
 
 import user.User;
 import user.UserRepository;
-
 import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
-import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.lang.Thread;
 import java.util.Scanner;
+
+/*
+    This class is responsible for the client administration and user interface via the command line
+ */
+
 
 public class TCPclient {
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
         Socket socket, socketG;
-        String serverAddress = "localhost" ;
-        System.out.print("Write your username: ");
+        String serverAddress = "localhost" , func;
+        System.out.println("WELCOME TO INFRA COM CHAT:");
+        System.out.print("Enter a username: ");
         String name = in.next();
-        String func = "";
         try{
-            ServerSocket tmpsocket = new ServerSocket(0);
-            int lport = tmpsocket.getLocalPort();
+            // Opens server socket on random open port so it can receive connects from other clients
+            ServerSocket svrSocket = new ServerSocket(0);
+            int lport = svrSocket.getLocalPort();
 
-            // server setup
-            socketG = new Socket(serverAddress, 3030);
-            DataOutputStream out = new DataOutputStream(socketG.getOutputStream());
+            while(true){
 
-            out.writeUTF(""+  lport);
-            out.writeUTF(name);
-            ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
-            UserRepository usrRep = (UserRepository) input.readObject();
-
-
-            out.close();
-            input.close();
-            while(!func.equals("close")){
-
-                System.out.println("Online Hosts: ");
-                usrRep.remove("localhost", lport);
-                usrRep.print();
-
-                //p2p setup
-                System.out.print("Enter your action: ");
+                System.out.print("Enter your action [connect/wait]:");
                 func = in.next();
+                // connects to application administration server
+                socketG = new Socket(serverAddress, 3030);
+                ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
+                DataOutputStream out = new DataOutputStream(socketG.getOutputStream());
+
+                // receives userRepository object with all the currently online users
+                UserRepository usrRep = (UserRepository) input.readObject();
+                System.out.println(usrRep.getOnlineUsers());
+                User connectedUser = null;
+
                 if(func.equals("connect")){
+
+                    // connects to the chosen user
                     int i = in.nextInt();
-                    User connectedUser = usrRep.find(i);
-                    System.out.println("connecting to the user...");
+                    connectedUser = usrRep.find(i);
                     socket = new Socket(connectedUser.getAddress(), connectedUser.getPort());
+
                 }else if (func.equals("wait")){
-                    System.out.println("waiting connection...");
-                    socket = tmpsocket.accept();
+
+                    // sends to the server the user's name and the port he is waiting for connection
+                    out.writeInt(lport);
+                    out.writeUTF(name);
+
+                    // starts server connection control thread
+                    MaintainServerConnection mnt = new MaintainServerConnection(socketG);
+                    mnt.start();
+
+                    // waits for othe user to connect to the client's server socket
+                    System.out.println("Waiting connection");
+                    socket = svrSocket.accept();
+
+                    // kills server connection control thread
+                    mnt.kill();
                 }else{
-                    System.out.println("closing chat...");
+                    System.out.println("Closing chat...");
                     break;
                 }
-                System.out.println("connection established");
+
+                // starts chat opening ReceiveMessages and SendMessages threads
+                System.out.println("You are now connected:");
                 Thread rcv = new ReceiveMessages(socket);
                 Thread snd = new SendMessages(socket);
                 rcv.start();
                 snd.start();
+
+
+                // closes all sockets, DataStreams and Threads opened in the execution
                 snd.join();
+                in.close();
+                out.close();
                 socket.close();
+                socketG.close();
             }
-            tmpsocket.close();
-        }catch (BindException e){
-            System.out.println(e.getMessage());
+            svrSocket.close();
         }catch (Exception e){
             System.out.println(e.getMessage());
         }

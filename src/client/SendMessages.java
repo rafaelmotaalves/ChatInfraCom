@@ -9,6 +9,12 @@ public class SendMessages  extends Thread{
     private DataOutputStream output;
     private Scanner in;
 
+
+    /*
+        Class responsible of sending the chat messages
+     */
+
+
     SendMessages(Socket socket) throws IOException {
         output = new DataOutputStream(socket.getOutputStream());
         in = new Scanner(System.in);
@@ -16,12 +22,15 @@ public class SendMessages  extends Thread{
 
     public void run() {
         try{
-            String msg = "";
-            while(true){
-                output.writeUTF(in.nextLine());
+            boolean connected = true;
+            while(connected){
+                try{
+                    output.writeUTF(in.nextLine());
+                }catch (IOException e){
+                    connected = false;
+                }
             }
-        }catch (IOException e){
-            System.out.println("User disconnected");
+        }catch (Exception e){
         }
     }
 }

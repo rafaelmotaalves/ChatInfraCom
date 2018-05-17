@@ -13,10 +13,6 @@ public class UserRepository implements Serializable {
         this.current = 0;
     }
 
-    public User [] getArray(){
-        return array;
-    }
-
     public void doubleSize(){
         this.size = 2 * this.size;
         User aux[] = new User[this.size];
@@ -25,13 +21,22 @@ public class UserRepository implements Serializable {
         }
         array = aux;
     }
-    public void print(){
-        for(int i = 0 ; i < this.current; i++){
-            System.out.println( "["+ i +"]" + "Name: " + array[i].getName() + " Address: " + array[i].getAddress() + " " + "Port: " + array[i].getPort());
+    public String getOnlineUsers(){
+        if(this.current > 0){
+            String result = "Online Users\n";
+            for(int i = 0 ; i < this.current; i++){
+                 result += "["+ i +"]" + " Name: " + array[i].getName() + "\n";
+            }
+            return result;
+        }else{
+            return "No users online Right now";
         }
     }
 
     public void insert(User newUser){
+        if(this.current == this.size){
+            doubleSize();
+        }
         array[this.current] = newUser;
         this.current++;
     }
@@ -40,9 +45,9 @@ public class UserRepository implements Serializable {
         return array[i];
     }
 
-    public void remove(String address, int port){
+    public void remove(User user){
         for(int i = 0; i < current; i++){
-            if(array[i].getAddress().equals(address) && array[i].getPort() == port){
+            if(array[i].equals(user)){
                 array[i] = array[this.current-1];
                 this.current--;
             }
