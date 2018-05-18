@@ -30,8 +30,6 @@ public class TCPclient {
 
             while(true){
 
-                System.out.print("Enter your action [connect/wait]:");
-                func = in.next();
                 // connects to application administration server
                 socketG = new Socket(serverAddress, 3030);
                 ObjectInputStream input = new ObjectInputStream(socketG.getInputStream());
@@ -39,8 +37,11 @@ public class TCPclient {
 
                 // receives userRepository object with all the currently online users
                 UserRepository usrRep = (UserRepository) input.readObject();
-                System.out.println(usrRep.getOnlineUsers());
                 User connectedUser = null;
+                System.out.println(usrRep.getOnlineUsers());
+
+                System.out.print("Enter your action [connect/wait]:");
+                func = in.next();
 
                 if(func.equals("connect")){
 
@@ -80,11 +81,11 @@ public class TCPclient {
 
                 // closes all sockets, DataStreams and Threads opened in the execution
                 snd.join();
-                in.close();
                 out.close();
                 socket.close();
                 socketG.close();
             }
+            in.close();
             svrSocket.close();
         }catch (Exception e){
             System.out.println(e.getMessage());
