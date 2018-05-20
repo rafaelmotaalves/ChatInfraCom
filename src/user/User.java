@@ -1,6 +1,7 @@
 package user;
 
 import java.io.Serializable;
+import java.net.Socket;
 
 public class User implements Serializable {
 
@@ -13,7 +14,6 @@ public class User implements Serializable {
         this.address = address;
         this.port = port;
     }
-
     public boolean equals(User user){
         return this.name.equals(user.getName()) && this.address.equals(user.getAddress())
                 && this.port == user.getPort();

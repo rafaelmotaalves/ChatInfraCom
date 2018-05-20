@@ -30,11 +30,13 @@ public class ClientTask extends Thread {
             // creates InputStreams and Send the current online users
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+
             out.writeObject(userRep);
 
             // gets the client port and his name and adds it to the repository of online users
             int clientPort = in.readInt();
             String clientName = in.readUTF();
+
 
             client = new User(clientName, clientSocket.getInetAddress().getHostName(),clientPort);
             System.out.println(client.toString() + " connected");

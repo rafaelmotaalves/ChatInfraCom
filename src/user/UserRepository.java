@@ -13,6 +13,14 @@ public class UserRepository implements Serializable {
         this.current = 0;
     }
 
+    public int getCurrent(){
+        return current;
+    }
+
+    public User get(int i){
+        return array[i];
+    }
+
     public void doubleSize(){
         this.size = 2 * this.size;
         User aux[] = new User[this.size];

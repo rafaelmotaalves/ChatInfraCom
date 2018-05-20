@@ -6,9 +6,11 @@ import java.net.Socket;
 
 public class ReceiveMessages  extends Thread{
     private DataInputStream input;
+    private String name;
 
-    ReceiveMessages(Socket socket) throws IOException {
+    ReceiveMessages(Socket socket, String name) throws IOException {
         input = new DataInputStream(socket.getInputStream());
+        this.name = name;
     }
 
 
@@ -24,15 +26,15 @@ public class ReceiveMessages  extends Thread{
             while(connected) {
                 try{
                     msg = input.readUTF();
-                    System.out.println(msg);
+                    System.out.println(this.name +": "+ msg);
                 }catch (IOException e){
                     connected = false;
                 }
             }
-            System.out.println("User disconnected");
+            System.out.println(this.name + " disconnected");
             input.close();
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }
