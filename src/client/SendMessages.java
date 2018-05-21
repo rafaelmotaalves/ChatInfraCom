@@ -39,7 +39,7 @@ public class SendMessages  extends Thread{
 
     public void run() {
         try{
-            String msg = "";
+            String msg;
             while(true){
                     msg = in.nextLine();
                     for(int i = 0 ; i < this.current; i++){
